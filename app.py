@@ -30,7 +30,7 @@ def simplify_text(text_to_simplify, target_audience):
 
     Provide the simplified explanation directly, without conversational filler."""
 
-    # getting response from the gemini model
+    # getting response from the gemini AI model
     try:
         response = model.generate_content(prompt_parts, request_options={"timeout": 600})
         return response.text.strip() 
