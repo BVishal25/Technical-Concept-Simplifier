@@ -1,41 +1,42 @@
 import streamlit as st
-import openai
 import google.generativeai as genai 
 
-# openai API key for connecting to the LLM
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else None
+# gemini API key for connecting to the LLM and error handling
+if "GEMINI_API_KEY" in st.secrets:
+    GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+else:
+    st.error("Google Gemini API key not found in .streamlit/secrets.toml or Streamlit Cloud secrets.")
+    st.stop()
 
 #function to get response from the LLM
-def simplify_text(text_to_simplity, target_audience, api_key):
-    openai.api_key = api_key
+def simplify_text(text_to_simplify, target_audience):
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
-    system_prompt = """
-    You are an expert technical communicator and simplifier. Your goal is to make complex technical documentation or concepts
-    and explain them clearly and concisely to a specific audience.
+    prompt_parts = f"""You are an expert technical communicator and simplifier. 
+    Your goal is to take complex technical documentation or concepts and explain them clearly 
+    and concisely to a specified audience.
     
-    Given a piece of technical text and a target audience, rephrase the text.
-    - Simplify Jargon: Replace or explain technical jargon in simple terms.
-    - Analogies/Examples: Use appropriate analogies or real-world examples relevant to the target audience.
-    - Conciseness: Be concise while retaining accuracy.
-    - Audience Tone: Adapt the tone and vocabulary to the audience.
+    Given the following technical text:
+    ---
+    {text_to_simplify}
+    ---
+    Please rephrase this text for a **{target_audience}**.
 
-    Output the simplified explanation directly, without conversational filler."""
+    Ensure you:
+    - Simplify jargon: Replace or explain technical jargon in simple terms.
+    - Use appropriate analogies or real-world examples relevant to that audience.
+    - Be concise while retaining accuracy.
+    - Adapt the tone and vocabulary to the chosen audience.
 
-    messages = [
-        {"role": "system", "content" : system_prompt},
-        {"role": "user", "content" : f"Original text:{text_to_simplity}\n\nTarget Audience:{target_audience}"}
-    ]
+    Provide the simplified explanation directly, without conversational filler."""
 
+    # getting response from the gemini model
     try:
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=500,
-            temperature=0.3
-        )
-        return response.choices[0].message.content.strip()
+        response = model.generate_content(prompt_parts)
+        return response.text.strip() 
+
     except Exception as e:
-        return f"An error occurred: {e}"
+        return f"An error occurred with Gemini API: {e}"
     
 st.set_page_config(page_title="Technical Content Simplifier AI Agent", layout="wide")
 
@@ -61,11 +62,11 @@ with col2:
     if st.button("Simplify Concept", type="primary"):
         if original_text:
             with st.spinner("Simplifying..."):
-                simplified_text = simplify_text(original_text, target_audience, OPENAI_API_KEY)
+                simplified_output = simplify_text(original_text, target_audience)
             st.subheader("Simplified Explanation")
-            st.write(simplified_text)
+            st.write(simplified_output)
         else:
             st.warning("Please enter some text to simplify.")
 
 st.markdown("---")
-st.markdown("Built with ❤️ by an AI Enthusiast using openai, streamlit, and prompt techniques.")
+st.markdown("Built with ❤️ by an AI Enthusiast using gemini model, streamlit, and prompt techniques.")
