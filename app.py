@@ -32,7 +32,7 @@ def simplify_text(text_to_simplify, target_audience):
 
     # getting response from the gemini model
     try:
-        response = model.generate_content(prompt_parts)
+        response = model.generate_content(prompt_parts, request_options={"timeout": 600})
         return response.text.strip() 
 
     except Exception as e:
