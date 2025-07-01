@@ -20,7 +20,7 @@ Then run it on streamlit
 ```streamlit run app.py.```
 
 # Demo: 
-If you deploy it, link to the live app!
+I deployed it in huggingface, [check it out](https://huggingface.co/spaces/RoronoaZoro/Technical-Content-Simplifier).
 
 # Prompt Engineering Insights:
 1. In this project, I used prompt techniques that I learned from deeplearning.AI course 'ChatGPT Prompt Engineering for Developers'
